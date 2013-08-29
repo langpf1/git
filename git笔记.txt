@@ -1,0 +1,212 @@
+1建一个叫test的文件夹，输入 mkdir test就可以了
+2如果在文件夹里添加（就是创建）一个文件 例如a.txt
+ 输入   touch  test/a.txt  回车
+3删除 rm -rf test/  回车
+
+Add .gtiignore:java
+
+查看当前目录中的.git文件夹下HEAD 的文件的内容: $ cat .git/HEAD 
+
+查看hello文件和example文件中的内容：cat hello example
+
+创建文件: echo "Hello world" > hello 
+
+编辑文件:echo "It's a new day for git" >> hello
+
+添加hello文件到版本库文件索引当中:git add hello
+(hello文件中的内容并没有提交到 git 的内容跟踪范畴之内)
+
+去除索引:git rm -cached hello
+
+查看当前的工作变化情况（没有则不显示）：git-diff
+
+将某个目录下(必须是仓库内)的所有内容全都纳入内容跟踪之下:git-add e:/git_1/oldproject
+看版本库的状态：git status
+
+版本库中加入了新的文件，并且 git 提示我们提交这些文件， 我们可以通过 git-commit 命令来提交：
+$ git commit -m "Initial commit of gittutor reposistory"
+
+版本库中的文件改变后使用组合命令 git add和gitcommit 将工作提交到版本库中:
+$ git add hello
+$ git commit -m "new day for git"
+这两条命令等价于命令：$ git commit -a -m "new day for git"
+
+针对某个文件的改变提交到版本库中：$ git-commit -m "Some workd" -i hello
+
+esc + :wq 退出当前编辑
+
+#######管理分支
+
+查看仓库分支：           git branch   
+                    
+创建一个名为robin的分支：git branch robin 
+     
+转移工作到robin分支上：  git checkout robin   
+   
+删除分支robin:           git branch -D robin 
+           
+查看版本库变化历史：     git whatchanged 
+
+看到版本库中每个分支的世系发展状态和每次提交的内容是否已进入每个分支：git show-branch 
+
+查看两个版本的差异： git diff master^ robin
+
+########合并分支
+
+将当前分支工作转移到master：git checkout master
+合并两个分支：git merge "Merge work in robin" HEAD robin
+        或者：git pull . robin，接着手工修改hello文件，然后提交：git commit -i hello
+
+查看hello文件内容：cat hello
+
+########逆转与恢复(undo && reset)
+命令形式：
+
+git-reset [--mixed | --soft | --hard] [<commit-ish>]
+命令的选项：
+
+--mixed
+    仅是重置索引的位置，而不改变你的工作树中的任何东西（即，文件中的所有变化都会被保留， 也不标记他们为待提交状态），并且提示什么内容还没有被更新了。这个是默认的选项。
+--soft
+    既不触动索引的位置，也不改变工作树中的任何内容，我们只是要求这些内容成为一份好的内容 （之后才成为真正的提交内容）。 这个选项使你可以将已经提交的东西重新逆转至“已更新但未提交（Updated but not Check in）”的状态。 就像已经执行过git-update-index 命令，但是还没有执行git-commit 命令一样。
+--hard
+    将工作树中的内容和头索引都切换至指定的版本位置中，也就是说自 <commit-ish> 之后的所有的跟踪内容和工作树中的内容都会全部丢失。 因此，这个选项要慎用，除非你已经非常确定你的确不想再看到那些东西了。
+
+创建并转移到分支softreset上：git checkout -b softreset
+
+修改文件要提交：echo "modify" >> hello
+                git commit -a -m "some modify" <=>git add hello+git commit -m "some modify"
+
+
+用 --soft 选项逆转刚才提交的内容：git reset --soft HEAD^
+
+
+恢复刚才被取消了的那次提交:$ git-commit -a -c ORIG_HEAD
+
+取出提交过的东西覆盖掉当前的文件:git checkout -f foo.c
+
+#######标定版本
+
+git中,有两种类型的标签,“轻标签”和“署名标签”。
+
+技术上说，一个“轻标签”和一个分支没有任何区别，只不过我们将它放在了 .git/refs/tags/ 目录， 而不是 heads 目录。因此，打一个“轻标签”再简单不过了。
+
+$ git-tag my-first-tag
+
+“署名标签”是一个真正的 git 对象，它不但包含指向你想标记的状态的指针，还有一个标记名和信息， 可选的 PGP 签名。你可以通过 -a 或者是-s 选项来创建“署名标签”。
+
+$ git-tag -s <tag-name>
+
+########合并外部工作
+   远程合并的无非就是“抓取（fetch）一个远程的版本库中的工作到一个临时的标签中”， 然后再使用git-merge 命令。
+
+抓取远程版本库:git fetch <remote-repository>
+根据不同的远程版本库所使用的通讯协议的路径来替代上面的 remoted-repository 就可以了。
+Rsync
+    rsync://remote.machine/patch/to/repo.git/
+SSH
+    remote.machine:/path/to/repo.git
+or
+    ssh://remote.machine/patch/to/repo.git/
+
+
+下面是个取得 SSH 远程版本库的命令例子：
+
+$ git-fetch robin@192.168.1.168:/path/to/gittutorcn.git  (1)
+
+(1) 这里 robin 是登录的用户名，192.168.1.168 是保存着主版本库的机器的 IP 地址。
+
+Local directory: /path/to/repo.git/
+    本地目录的情况和 SSH 情况是一样的。
+git Native
+    git://remote.machine/path/to/repo.git/
+    git 自然协议是设计来用于匿名下载的，它的工作方式类似于 SSH 协议的交换方式。
+HTTP(S)
+    http://remote.machine/path/to/repo.git/
+
+########通过电子邮件交换工作
+下面模拟你参加到《Git 中文教程》的编写工作中来，看看我们可以怎么通过 email 进行工作交流。 你可以通过下面的命令下载这个项目的版本库。
+
+$ git clone http://www.bitsun.com/git/gittutorcn.git
+
+之后，你会在当前目录下得到一个叫 gittutorcn 的目录， 这就是你的项目的工作目录了。默认地，它会有两个分支：master 和origin，你可以直接在master 下展开工作， 也可以创建你自己的工作分支，但是千万不要修改 origin 分支，切记！ 因为它是公共版本库的镜像，如果你修改了它， 那么就不能生成正确的对公共版本库的patch 文件了。
+
+使用git reset --hard 命令将它逆转到最原始的，没经过任何修改的状态.
+
+#######################
+
+程序员Bob将仓库munger项目拷贝到当前目录下的myrepo(不存在则自动新建)文件夹下：
+$ git clone e:/munger myrepo
+这样就创建了一个保存着程序员Alice 的版本库的镜像的新目录 "myrepo"，这个镜像保存着原始项目的起点和它的发展历程。
+接着 Bob 对项目做了些更改并提交了这些更改：
+
+(编辑一些文件)
+
+$ git-commit -a 
+
+(如果需要的话再重复这个步骤)
+
+当他搞定之后，他告诉Alice将他的东西从 e:/myrepo 中引入，Alice只需要这样：
+
+$ cd e:/project
+$ git pull e:/myrepo
+ 
+    这样就将 Bob 的版本库中的 "master" 分支的变化引入了。Alice 也可以通过在 pull 命令的后面加入参数的方式来引入其他的分支。
+    在导入了 Bob 的工作之后，用 "git whatchanged" 命令可以查看有什么信的提交对象。 如果这段时间里以来，Alice 也对项目做过自己的修改，当 Bob 的修改被合并进来的时候， 那么她需要手动修复所有的合并冲突。
+谨慎的 Alice 在导入 Bob 的工作之前，希望先检查一下。 那么她可以先将 Bob 的工作导入到一个新创建的临时分支中， 以方便研究 Bob 的工作：
+
+$ git fetch e:/myrepo master:bob-incoming 
+这个命令将 Bob 的 master 分支的导入到名为 bob-incoming 的分支中（ 不同于 git-pull 命令，git-fetch 命令只是取得 Bob 的开发工作的拷贝， 而不是合并经来）。
+
+接着：
+$ git whatchanged -p master bob-incoming
+这会列出 Bob 自取得 Alice 的 master 分支之后开始工作的所有变化。 检查过这些工作，并做过必须的调整之后， Alice 就可以将变化导入到她的 master 分支中：
+
+$git-checkout master
+$git pull . bob-incoming
+最后的命令就是将 "bob-incoming" 分支的东西导入到 Alice 自己的版本库中的,稍后，Bob就可以通过下面的命令同步 Alice 的最新变化。
+
+$ git-pull
+
+注意不需为这个命令加入 Alice 的版本库的路径，因为当 Bob 克隆 Alice 的版本库的时候，git 已经将这个路径保存到 .git/remote/origin 文件中，它将会是所有的导入操作的默认路径。
+
+Bob 可能已经注意到他并没有在他的版本库中创建过分支（但是分支已经存在了）：
+
+$ git branch
+* master
+  origin
+
+"origin" 分支，它是运行 "git-clone" 的时候自动创建的，他是 Alice 的 master 分支的原始镜像，Bob 应该永远不要向这个分支提交任何东西。
+
+如果 Bob 以后决定在另外一部主机上开展工作，那么他仍然需要通过 SSH 协议从新克隆和导入（Alice 的版本库）：
+
+$ git-clone alice.org:/home/alice/project/ myrepo
+
+我们可以使用 git 自然协议，或者是 rsync, http 等协议的任何一种，详情请参考git-pull。
+
+Git 同样可以建立类似 CVS 那样的开发模式，也就是所有开发者都向中心版本库提交工作的方式， 详情参考git_push和git for CVS users 。
+
+#############为版本库打包
+
+   在前面，我们已经看到在 .git/objects/??/ 目录中保存着我们创建的每一个 git 对象。 这样的方式对于自动和安全地创建对象很有效，但是对于网络传输则不方便。git 对象一旦创建了，就不能被改变，但有一个方法可以优化对象的存储，就是将他们“打包到一起”。
+
+$ git repack
+
+   上面的命令让你做到这点，如果你一直是做着我们的例子过来的， 你现在大约会在 .git/objects/??/ 目录下积累了17个对象。git repack 会告诉你有几个对象被打包了， 并且将他们保存在.git/objects/pack 目录当中。你将会看到两个文件，pack-*.pack and pack-*.idx 在.git/objects/pack 目录。他们的关系是很密切的， 如果你手动将他们拷贝到别的版本库中的话，你要决定将他们一起拷贝。 前者是保存着所有被打包的数据的文件，后者是随机访问的索引。
+如果你是个偏执狂，就运行一下 git-verity-pack 命令来检查一下有缺陷的包吧， 不过，其实你无须太多担心，我们的程序非常出色 ;-).
+
+一旦你已经对那些对象打包了，那么那些已经被打过包的原始的对象，就没有必要保留了。
+
+$ git prune-packed
+
+会帮你清除他们。
+
+如果你好奇的话，你可以在执行 git-prune-repacked 命令之前和之后， 都运行一下 find .git/objects -type f，这样你就能看到有多少没有打包的对象， 以及节省了多少磁盘空间。
+Note
+	git pullgit-pull 对于 HTTP 传输来说，一个打包过的版本库会将一定数量的 相关联的对象放进一个有关联性的打包中。如果你设想多次从 HTTP 公共版本库中导入数据， 你也许要频繁地 reapck & prune，要么就干脆从不这样做。
+
+如果你此时再次运行 git-repack，它就会说 "Nothing to pack"。 要是你继续开发，并且积累了一定数量的变迁，再运行git-repack 将会创建一个新的包， 它会包含你自上次对库打包以来创建的对象。我们建议你尽快在初始化提交之后打包一下你的版本库（ 除非你现在的项目是个涂鸦式的草稿项目），并且在项目经历过一段很活跃的时期时， 再运行git-repack 一下。
+
+当一个版本库通过 git-push 和 git-pull 命令来同步源版本库中打包过的对像的时候， 通常保存到目标版本库中的是解包了的对象，除非你使用的是 rsync（远程同步协议）协议的传输方式。 正是这种容许你在两头的版本库中有不同的打包策略的方式，他意味着你也许在过一段时间之后， 需要在两头的版本库中都重新打包一下。
+
+
