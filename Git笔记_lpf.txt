@@ -1,0 +1,305 @@
+clone
+------------------------------------------------
+1.git clone git@20.10.1.195:ae_grup/meta.rdi meta01
+   //将远端仓库clone到当前路径下的meta01文件夹下(不存在则会新建该文件夹)
+
+2.如何从git服务器端clone指定的分支？
+   $ git clone -b master2 ../server .
+  表示克隆名为master2的这个分支，如果省略-b <name>表示克隆master分支。
+
+1,2可以合并执行：git clone -b develop git@20.10.1.195:ae_grup/meta.rdi meta01
+
+fetch
+-------------------------------------------------
+2.git fetch github ---可以取下git仓库中所有的分支，包括新的分支，已有的分支则会被更新
+  
+ 从远程仓库github中取出所有更新到本地仓库中，然后merge到本地的当前checkout的分支上：
+ git fetch github; git merge github/master
+
+3.从多个仓库中更新代码:
+  git fetch --all
+ 
+ 在fetch之后删除没有与远程分支对应的本地分支：
+ $ git fetch -p
+
+4.将远程分支remote_branch拷贝到本地temp分支上，但不进行合并:
+ $ git fetch e:/myrepo temp:remote_branch 
+
+pull
+--------------------------------------------------
+4.将远程仓库的develop分支pull到本地当前checkout的分支上：
+
+  进入当前仓库相应的分支后，输入：git pull git@20.10.1.195:ae/rdi.git develop
+  
+  说明：在git pull [alias] [branch]中如果没有写明[branch]，则会将远程仓库上与本地当前          checkout的分支名称相同的分支pull下来;
+
+  在合并至当前分支之前，将远程分支的变更保存为本地的分支：
+  $ git pull git://example.com/project.git theirbranch:mybranch
+  
+  只会当前checkout的分支：
+  $ git pull git@20.10.1.195:ae_group/rdi.git  
+    
+
+push
+--------------------------------------------------
+5.git-push : 远端repository名 本地分支名:远端分支名
+
+  $ git push origin test:master         // 提交本地test分支作为远程的master分支
+  $ git push origin test:test           // 提交本地test分支作为远程的test分支
+
+6.将本地新建的分支[branch],push到远程仓库[alias]中,如果远程仓库存在该[branch],该[branch]会     被更新，如果不存在则会被创建：
+  $ git push [alias] [branch]
+  (前提：首先checkout到当前分支上再push)
+
+7.强推，即利用强覆盖方式用你本地的代码替代git仓库内的内容
+
+  $ git push -f
+
+merge
+-------------------------------------------------
+7.将远程仓库下载下来的master分支(显示为github/master或者origin/master)，合并到本地master分   支上：
+   git merge github/master
+
+8.如何将mater分支merge到mirror分支？
+    在master分支上进行了改动并commit后，将活动转向mirror分支上，然后在master上右键选择merge    ，并选择自己其中的一次commit，合并到mirror主分支上。
+  命令行形式：先checkout到mirror分支上，然后输入：git merge mirror master(目的分支  源分支)
+  命令顺序如下：
+  $ git checkout mirror
+  $ git merge "Merge work in robin" mirror master
+  
+  合并两个分支，还有一个更简便的方式，下面的命令和上面的命令是等价的。
+  $ git checkout mirror
+  $ git pull . master
+  
+  或者：git pull . robin，接着手工修改hello文件，然后提交：git commit -i hello
+#############################################################
+9.分支管理
+  
+  重命名本地分支：
+  $ git branch -m <old_branch_name> <new_branch_name>
+  
+  创建一个名为robin的分支：
+  $ git branch robin
+  
+  删除分支：
+  git branch -D master
+
+  删除远程分支：
+  git push origin --delete <branchName>
+      例如删除远程仓库中的mirror分支:git push origin --delete mirror
+  或者：推送一个空分支到远程分支，其实就相当于删除远程分支：
+  $ git push origin :<branchName>
+  说明：这里的origin相当于远程仓库的url
+
+  查看分支：
+  $ cat .git/HEAD
+    HEAD 的内容应该是这样: ref: refs/heads/master
+    HEAD 文件中的内容其实只是包含了一个索引信息，并且，这个索引将总是指向你的项目中的当前开    发分支
+  or
+  $ git show [branch]
+
+  转移工作到mirror分支上：
+  $ git checkout mirror
+  
+  如何查看工作目录发生了什么变更，即查看版本库状态：    
+  $ git status
+  $ git status -s
+
+  查看隐藏分支：
+  $ git branch -a
+
+  只查看从远程仓库down下来的分支：
+  $git branch -r
+  
+  看到版本库中每个分支的世系发展状态和每次提交的内容是否已进入每个分支：
+  $ git show-branch
+  
+  查看分支发生了哪些变化：
+  $ git whatchanged 
+ 
+  查看两个版本的差异：
+  $ git diff master^ develop  
+  
+  基于某个分支创建一个新的分支：
+  //新分支：experiment；基分支：origin/experimental
+  $ git checkout -b experimental origin/experimental 
+#########################################################################
+10.如何设置用户名密码？
+  git config user.name "langpf1"
+  git config user.email "langpf1@yonyou.com"
+  查看用户名密码：
+  git config user.name
+  git config user.email
+  或者：
+  cat ~/.gitconfig
+###########################################################################
+提交变更
+
+版本库中加入了新的文件，并且 git 提示我们提交这些文件， 我们可以通过 git-commit 命令来提交：
+
+$ git commit -a  with the -a option means that any file was in your last commit and has                       been modified
+$ git commit -m "Initial commit of gittutor reposistory"
+
+版本库中的文件改变后使用组合命令 git add和gitcommit 将工作提交到版本库中:
+$ git add hello
+$ git commit -m "new day for git"
+
+这两条命令等价于命令：
+$ git commit -a -m "new day for git"
+
+针对某个文件的改变提交到版本库中：
+$ git commit -m "Some workd" -i hello
+##############################################################################
+13.逆转与恢复：git-reset
+  命令形式： git-reset [--mixed | --soft | --hard] [<commit-ish>]
+
+  --mixed
+     仅是重置索引的位置，而不改变你的工作树中的任何东西(即，文件中的所有变化都会被保留，也     不标记他们为待提交状态)，并且提示什么内容还没有被更新了。这个是默认的选项。
+ 
+  --soft
+      既不触动索引的位置，也不改变工作树中的任何内容，我们只是要求这些内容成为一份好的内容(    之后才成为真正的提交内容)。这个选项使你可以将已经提交的东西重新逆转至“已更新但未提交        (Updated but not Check in)”的状态。就像已经执行过 git-update-index 命令，但是还没有执行     git-commit 命令一样。
+
+  --hard
+     将工作树中的内容和头索引都切换至指定的版本位置中，也就是说自 <commit-ish> 之后的所有的    跟踪内容和工作树中的内容都会全部丢失。因此，这个选项要慎用，除非你已经非常确定你的确不想再   看到那些东西了。
+
+  $ git reset --hard commit-ID将工作目录的文件恢复到指定的版本
+#######################################################################
+19.提取版本库中的数据，即取出你提交过的东西，覆盖掉当前的文件 
+  $ git-checkout -f foo.c
+
+24.将仓库中的已载入文件取消载入(staged-->unstaged),并被从磁盘中删除，使其在commit的时候不被     提交: 
+   git rm [file]  (如删除本地远程分支：rm .git/refs/remotes/origin/new)
+   如果不想被从磁盘中删除可以使用,
+   
+   即,将文件去除索引:
+   git rm --cached [file]
+   
+   git mv相当于git rm --cached orig; mv orig new; git add new 
+
+21.gitk查看你做了些什么：
+  $ gitk --all &
+
+22.在当前分支上查看最近commit的内容：
+   git log github/master ^master
+#######################################################################
+16.开发过程中使用的Git分支模型?
+     最主要的两个分支为master与develop分支，分别代表 发布/开发中 两个状态。develop 是每日构  建的来源，当到了稳定的状态就可以合并到master上，也就是发布了新版本 。
+  此外，辅助性分支有特性分支(feature branch)、待发布分支(release branch)及补丁分支         (hotfix branch)。特性分支由各开发创建，主要用来实现新需求，从develop分支上分出，待开发完成  后合并到develop分支上。
+     待发布分支在开发到一定的阶段进入固化状态时创建，从develop分支分出，只做小的bug修复，达    到理想状态后，把release分支合并到master分支，也就是发版了， 且可以随时合并到develop分支上    。补丁分支一般从master分支分出，主要用来修改已发布版本的bug。相当于累积的通版补丁，且必须   合并回develop分支上。
+
+tag
+-----------------------------------------------------------------------
+17.标定版本
+   在 git 中，有两种类型的标签，“轻标签”和“署名标签”。
+   技术上说，一个“轻标签”和一个分支没有任何区别，只不过我们将它放在了 .git/refs/tags/ 目录    ,而不是 heads目录。因此，打一个“轻标签”再简单不过了。
+  
+  $ git-tag my-first-tag
+  如果你打算针对某个commit ID来打标签，虽然该命令可以通过gitk里的右键菜单来实现，但是该命令    对实际应用是很有帮助的。
+  $ git-tag mytag f0af6283824688f9d23426031734657661b54388
+
+ “署名标签”是一个真正的 git 对象，它不但包含指向你想标记的状态的指针，还有一个标记名和信息  ，可选的PGP 签名。你可以通过 -a 或者是 -s 选项来创建“署名标签”。
+  $ git-tag -s <tag-name>
+
+18.标记版本：
+  $ git tag -a v1.0 
+  使用下面命令查看所标记的tag标签：
+  $ git log --decorate
+  或者
+  $ git log --oneline --decorate --graph
+  从远程仓库取到带有tags的命令形式如下：
+  $ git fetch origin --tags
+
+  删除远程分支上的tag:
+  $ git push origin --delete tag <tagname>
+######################################################################
+remote
+-----------------------------
+23.查看当前仓库的远程仓库的url：
+   $ git remote -v
+
+   删除当前仓库的远程仓库的url：
+   $ git remote rm
+
+   给当前仓库设置相应的远程仓库的url:
+   $ git remote set-url --push origin git://github.com/pjhyett/hw.git
+
+   给远程仓库url设置别名gunflub：
+   $ git remote set-url guhflub git://github.com/mojombo/hw.git
+   
+   设置一个只进行push操作的远程仓库：
+   $ git remote set-url --push origin git://github.com/pjhyett/hw.git
+
+   说明：git remote set-url会调用git config remote命令，只是前者执行出错后会添加了相应的报错    类型，后者不会
+
+   显示远端origin仓库的信息：
+   $ git remote show origin
+   $ git ls-remote --heads origin 
+   (--heads选项只列出远程仓库的分支)
+
+   将远端仓库名称pb改为paul：
+   $ git remote rename pb paul
+
+   删除本地仓库所关联的origin远程分支:
+   $ git remote prune origin
+
+   git remote add添加远程分支：
+   $ git remote add win32 git://gutup.com/users/joe/myproject-linux-port
+################################################################################
+13.备份工作目录
+   可以多次使用git stash将未提交的代码压入到Git栈中：
+   $ git stash  
+
+   将当前的Git栈信息打印出来:
+   $ git stash list 
+
+   将工作目录恢复到之前的状态，继续之前的工作：
+   $ git stash apply 
+
+   退栈：
+   $ git stash pop 
+
+   当Git栈中所有的内容都被恢复后，可以使用git stash clear来将栈清空：
+   $ git stash clear  
+#################################################################################
+14.二分查找
+   $ git bisect
+
+15.垃圾回收
+   $ git gc
+
+16.设置默认仓库和分支：
+   $ git config branch.master.remote origin 
+   $ git config branch.master.merge refs/heads/master  
+###############################################################################
+17.git patch补丁管理
+   
+   git diff生成的标准patch (基于当前checkout的分支生成补丁)
+   $ git diff
+
+   针对master分支生成补丁
+   $ git diff master > patch
+
+   git专用补丁，git format-patch的-M选项表示这个patch要和那个分支比对
+   $ git format-patch -M master
+  
+   ps: 两种patch的比较：
+
+    兼容性：很明显，git diff生成的Patch兼容性强。如果你在修改的代码的官方版本库不是Git管理的版本库，那么你必须使用git diff生成的patch才能让你的代码被项目的维护人接受。
+    除错功能：对于git diff生成的patch，你可以用git apply --check 查看补丁是否能够干净顺利地应用到当前分支中；如果git format-patch 生成的补丁不能打到当前分支，git am会给出提示，并协助你完成打补丁工作，你也可以使用git am -3进行三方合并，详细的做法可以参考git手册或者《Progit》。从这一点上看，两者除错功能都很强。
+    版本库信息：由于git format-patch生成的补丁中含有这个补丁开发者的名字，因此在应用补丁时，这个名字会被记录进版本库，显然，这样做是恰当的。因此，目前使用Git的开源社区往往建议大家使用format-patch生成补丁。
+
+   对某个分支打补丁
+   $ git apply patch
+
+   对于含有email的补丁，打补丁的方式为	   
+   $ git am 0001-Fix1.patch
+
+   查看补丁是否能够干净顺利地应用到当前分支中(只针对git diff产生的补丁)
+   $ git apply --check
+
+   查看补丁0001-Fix1.patch文件内容
+   $ cat 0001-Fix1.patch
+
+   查看针对某个tag所做了哪些改变
+   $ git diff [version]
+   $ git diff v0.9 --stat
